@@ -1,23 +1,22 @@
 import torchaudio
 import torch
+import os
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from flask import Flask, request, jsonify
+from pydub import AudioSegment
+from io import BytesIO
 
 app = Flask(__name__)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def audio_to_tensor(audio_file):
-
     batch = []
-
-    waveform, sample_rate = torchaudio.load(audio_file.stream)
+    waveform, sample_rate = torchaudio.load(audio_file)
     resampler = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)
     waveform = resampler(waveform)
-
     if waveform.shape[0] > 1: # Если стерео-, квадро- и т.д., то усредняем
         waveform = torch.mean(waveform, dim=0, keepdim=True)
     batch.append(waveform.squeeze())
-
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True)
 
 processor_whisper = WhisperProcessor.from_pretrained("openai/whisper-large")
@@ -43,7 +42,19 @@ def transcribe():
         return jsonify({'error': 'No file provided'}), 400
     try:
         audio_file = request.files['file']
-        waveforms_correct = audio_to_tensor(audio_file)
+        print(f"Received file: {audio_file.filename}")
+        file_path = os.path.join('C:/Users/Home/Documents/', audio_file.filename)
+
+        audio_file.save(file_path)
+        audio_file.stream.seek(0) #сброс считывающей каретки на начало потока
+
+        print(f"File saved to: {file_path}")
+        audio_stream = audio_file.stream
+        audio = AudioSegment.from_file(audio_stream)
+        output_stream = BytesIO()
+        audio.export(output_stream, format="wav")
+        output_stream.seek(0)
+        waveforms_correct = audio_to_tensor(output_stream)
         result = Whisper_inference(waveforms_correct)[0]
     except Exception as e:
         return jsonify({'error': str(e)}), 500
