@@ -1,0 +1,10 @@
+name: my_project_env
+channels:
+  - defaults
+dependencies:
+  - python=3.11.3
+  - playwright
+  - requests
+  - pip
+  - pip:
+      - playwright
