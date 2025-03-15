@@ -1,0 +1,15 @@
+name: my_project
+channels:
+  - defaults
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.11.3  # укажите версию Python, используемую в вашем проекте
+  - cudatoolkit=12.6  # убедитесь, что соответствует вашей версии CUDA
+  - pip
+  - pip:
+    - pysoundfile
+    - flask
+    - pytorch=2.6.0+cu126
+    - torchaudio=2.6.0+cu126
+    - transformers=4.49.0
