@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     margin = 0
     for idx in range(len(engWordsList)):
-        if any(triplet in engWordsList[idx-margin] for triplet in tripleList):
+        if any(subStr in engWordsList[idx-margin] for subStr in excludeList):
             engWordsList.pop(idx-margin)
             margin += 1
     print('Finally english words count: ', len(engWordsList))
