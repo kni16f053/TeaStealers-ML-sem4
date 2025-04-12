@@ -9,8 +9,8 @@ stages:
       size: 2583452
     - path: src/data_tools/prepare_data.py
       hash: md5
-      md5: 3dbc9ad235084ad1eef1c97faaa43c72
-      size: 5107
+      md5: 68aa65bc713bd1b803e161131e8e4798
+      size: 5249
     params:
       src/params.py:
         PreparedDataset.save_path: data/prepared/prepared_dataset.csv
@@ -22,5 +22,5 @@ stages:
       size: 635
     - path: data/prepared/prepared_dataset.csv
       hash: md5
-      md5: 271ac4be46be3849188aadbe475f50b2
-      size: 2493273
+      md5: 53fefbf918c52fd49a77e67ee856e1c1
+      size: 3551698

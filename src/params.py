@@ -11,10 +11,12 @@ class Settings:
 class Dataset:
     path: str = "data/external/labeled_dataset.txt"
     delimiter: str = " № "
+    audio_dir: str = "data/external/audios/"
 
 
 @dataclass(frozen=True)
 class PreparedDataset:
     save_path: str = "data/prepared/prepared_dataset.csv"
     vocab_path: str = "data/prepared/phonemes_vocab.csv"
+    sep: str = "№"
 

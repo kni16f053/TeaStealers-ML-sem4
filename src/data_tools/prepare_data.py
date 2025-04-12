@@ -21,6 +21,9 @@ binary_phonemes_list = [
 
 phonemes_list = unary_phonemes_list + binary_phonemes_list
 
+def make_path(url):
+    return Dataset.audio_dir + url.split("/")[-1]
+
 def clean_transcription(transcription):
     return transcription[2:-2] # отсекаем слеши в начале и в конце
 
@@ -151,7 +154,9 @@ if __name__ == "__main__":
     for word in wrong_words:
         df_new = drop_word(word, df_new)
         
-    df_new.to_csv(PreparedDataset.save_path, sep="№")
+    df_new["path"] = df["url"].apply(make_path)
+        
+    df_new.to_csv(PreparedDataset.save_path, sep=PreparedDataset.sep)
     
     phonemes, frequencies = get_phonemes_frequencies(df_new)
     frequencies_sorted, phonemes_sorted = zip(*sorted(zip(frequencies, phonemes), reverse=True))
