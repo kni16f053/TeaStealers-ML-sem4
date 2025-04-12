@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class Settings:
     mlflow_uri: str = "http://localhost:8090"
     tracking_commit_file: str = "../tracking_commit.lock"
+    experiment_name: str = "Model v1"
 
 
 @dataclass(frozen=True)
@@ -22,8 +23,8 @@ class PreparedDataset:
     
 @dataclass(frozen=True)
 class Split:
-    train: float = 0.85
-    val: float = 0.1
+    train: float = 0.001
+    val: float = 0.001
     
 @dataclass(frozen=True)
 class Model:
@@ -36,7 +37,7 @@ class Optimizer:
 @dataclass(frozen=True)
 class Training:
     batch_size: int = 2
-    num_epochs: int = 20
+    num_epochs: int = 2
     
 @dataclass(frozen=True)
 class Evaluation:

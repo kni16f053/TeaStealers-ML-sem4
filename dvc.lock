@@ -24,3 +24,32 @@ stages:
       hash: md5
       md5: 53fefbf918c52fd49a77e67ee856e1c1
       size: 3551698
+  train-and-evaluate:
+    cmd: python -m src.train.train
+    deps:
+    - path: data/prepared/phonemes_vocab.csv
+      hash: md5
+      md5: 346c5a6ac33f630cb7e56a8ad668d46f
+      size: 635
+    - path: data/prepared/prepared_dataset.csv
+      hash: md5
+      md5: 53fefbf918c52fd49a77e67ee856e1c1
+      size: 3551698
+    - path: src/train/train.py
+      hash: md5
+      md5: 020ce5b4279aaef2140cef5e8845ea69
+      size: 6197
+    params:
+      src/params.py:
+        Evaluation:
+          metric: wer
+        Model:
+          name: facebook/wav2vec2-large-960h-lv60
+        Optimizer:
+          lr: 0.001
+        Split:
+          train: 0.001
+          val: 0.001
+        Training:
+          batch_size: 2
+          num_epochs: 2

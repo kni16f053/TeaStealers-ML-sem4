@@ -6,6 +6,7 @@ import json
 import numpy as np
 from torch.nn import Linear
 from evaluate import load
+import mlflow
 
 
 from transformers import (
@@ -27,8 +28,11 @@ from ..params import PreparedDataset
 import sys
 sys.path.append('..')
 
+from dataclasses import asdict
+
+from .. import params
 from ..data_tools.data_utils import ASR_Dataset, collate_fn
-from ..params import Split, Model, Optimizer, Training, Evaluation
+from ..params import Settings, Split, Model, Optimizer, Training, Evaluation
 
 def run_epoch(model, dataloader, processor, train=False, optimizer=None):
     
@@ -117,34 +121,58 @@ optimizer = AdamW(model.parameters(), lr=Optimizer.lr)
 num_epochs = Training.num_epochs
 
 if __name__ == "__main__":
+    
+    mlflow.set_tracking_uri(Settings.mlflow_uri)
+    mlflow.set_experiment(Settings.experiment_name)
+    
+    with mlflow.start_run() as run:
+        with open(Settings.tracking_commit_file, "w") as f:
+            f.write(f"{run.info.run_id}")
+            
+        split_params = {f"Split.{k}":v for k, v in asdict(params.Split()).items()}
+        model_params = {f"Model.{k}":v for k, v in asdict(params.Model()).items()}
+        optimizer_params = {f"Optimizer.{k}": v for k, v in asdict(params.Optimizer()).items()}
+        training_params = {f"Training.{k}": v for k, v in asdict(params.Training()).items()}
+        evaluation_params = {f"Evaluation.{k}": v for k, v in asdict(params.Evaluation()).items()}
+        mlflow.log_params(split_params | model_params | optimizer_params | training_params | evaluation_params)
 
-    train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+        train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+        train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
+        val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+        test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
-    for name, param in model.named_parameters():
-        param.requires_grad = any(unfreeze_name in name for unfreeze_name in ["encoder.layers.23", "lm_head"])
-        if param.requires_grad:
-            print(f"Разморожен: {name}")
-        else:
-            print(f"Заморожен: {name}")
+        for name, param in model.named_parameters():
+            param.requires_grad = any(unfreeze_name in name for unfreeze_name in ["encoder.layers.23", "lm_head"])
+            if param.requires_grad:
+                print(f"Разморожен: {name}")
+            else:
+                print(f"Заморожен: {name}")
 
-    model.to(device)
-
-    for epoch in range(num_epochs):
-
-        train_loss, train_wer = run_epoch(model, dataloader=train_dataloader, processor=processor, train=True, optimizer=optimizer)
+        model.to(device)
         
-        print(f"[Epoch {epoch + 1}] train_loss = {train_loss}, train_wer = {train_wer}")
+        metrics = {}
+
+        for epoch in range(num_epochs):
+
+            train_loss, train_wer = run_epoch(model, dataloader=train_dataloader, processor=processor, train=True, optimizer=optimizer)
+            metrics[f"Epoch {epoch + 1} train_loss"] = train_loss
+            metrics[f"Epoch {epoch + 1} train_wer"] = train_wer
+            
+            print(f"Epoch {epoch + 1} train_loss = {train_loss}, train_wer = {train_wer}")
+            
+            val_loss, val_wer = run_epoch(model, dataloader=val_dataloader, processor=processor, train=False, optimizer=None)
+            metrics[f"Epoch {epoch + 1} validation_loss"] = val_loss
+            metrics[f"Epoch {epoch + 1} validation_wer"] = val_wer
+            
+            print(f"Epoch {epoch + 1} validation_loss = {val_loss}, validation_wer = {val_wer}")
+
+        torch.save(model.state_dict(), "20_epoch.pth")
+
+        # test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
+        # metrics["test_loss"] = test_loss
+        # metrics["test_wer"] = test_wer
+
+        # print(f"test_loss = {test_loss}, test_wer = {test_wer}")
         
-        val_loss, val_wer = run_epoch(model, dataloader=val_dataloader, processor=processor, train=False, optimizer=None)
-        
-        print(f"[Epoch {epoch + 1}] validation_loss = {val_loss}, validation_wer = {val_wer}")
-
-    torch.save(model.state_dict(), "20_epoch.pth")
-
-    test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
-
-    print(f"test_loss = {test_loss}, test_wer = {test_wer}")
+        mlflow.log_metrics(metrics)
