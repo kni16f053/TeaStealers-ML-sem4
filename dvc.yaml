@@ -20,3 +20,10 @@ stages:
       - ${PreparedDataset.save_path}
       - ${PreparedDataset.vocab_path}
       - src/train/train.py
+    params:
+      - src/params.py:
+          - Split
+          - Model
+          - Optimizer
+          - Training
+          - Evaluation
