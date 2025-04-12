@@ -23,8 +23,8 @@ class PreparedDataset:
     
 @dataclass(frozen=True)
 class Split:
-    train: float = 0.001
-    val: float = 0.001
+    train: float = 0.85
+    val: float = 0.1
     
 @dataclass(frozen=True)
 class Model:
@@ -36,7 +36,7 @@ class Optimizer:
     
 @dataclass(frozen=True)
 class Training:
-    batch_size: int = 2
+    batch_size: int = 12
     num_epochs: int = 2
     
 @dataclass(frozen=True)

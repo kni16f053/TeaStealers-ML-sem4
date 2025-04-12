@@ -169,10 +169,10 @@ if __name__ == "__main__":
 
         torch.save(model.state_dict(), "20_epoch.pth")
 
-        # test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
-        # metrics["test_loss"] = test_loss
-        # metrics["test_wer"] = test_wer
+        test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
+        metrics["test_loss"] = test_loss
+        metrics["test_wer"] = test_wer
 
-        # print(f"test_loss = {test_loss}, test_wer = {test_wer}")
+        print(f"test_loss = {test_loss}, test_wer = {test_wer}")
         
         mlflow.log_metrics(metrics)
