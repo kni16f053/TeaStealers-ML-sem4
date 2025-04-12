@@ -1,0 +1,6 @@
+outs:
+- md5: f83815e0f8e2fdce790857d49fd42327.dir
+  size: 1153217388
+  nfiles: 110269
+  hash: md5
+  path: augmented_audios
