@@ -1,0 +1,16 @@
+vars:
+  - src/params.py
+
+stages:
+  prepare-dataset:
+    cmd: python -m src.data_tools.prepare_data
+    deps:
+      - ${Dataset.path}
+      - src/data_tools/prepare_data.py
+    params:
+      - src/params.py:
+          - PreparedDataset.save_path
+          - PreparedDataset.vocab_path
+    outs:
+      - ${PreparedDataset.save_path}
+      - ${PreparedDataset.vocab_path}

@@ -1,8 +1,11 @@
 import pandas as pd
 import json
+import pathlib
 
 import warnings
 warnings.filterwarnings('ignore')
+
+from ..params import Dataset, PreparedDataset
 
 unary_phonemes_list = [
     "æ","ɪ", "ɛ", "ɒ", "ʊ", "ʌ", "ə",
@@ -113,7 +116,7 @@ def show_word_by_transcription(transcription, df):
 
 if __name__ == "__main__":
     
-    df = pd.read_csv("../../data/external/labeled_dataset.txt", delimiter="№", 
+    df = pd.read_csv(Dataset.path, delimiter=Dataset.delimiter, 
                  header=None, names=[
                      "word",
                      "transcription",
@@ -148,7 +151,7 @@ if __name__ == "__main__":
     for word in wrong_words:
         df_new = drop_word(word, df_new)
         
-    df_new.to_csv("../../data/prepared/prepared_dataset.csv", sep="№")
+    df_new.to_csv(PreparedDataset.save_path, sep="№")
     
     phonemes, frequencies = get_phonemes_frequencies(df_new)
     frequencies_sorted, phonemes_sorted = zip(*sorted(zip(frequencies, phonemes), reverse=True))
@@ -161,7 +164,7 @@ if __name__ == "__main__":
         phonemes_vocab[phoneme] = i
         i += 1
         
-    with open("../../data/prepared/phonemes_vocab.json", "w") as json_file:
+    with open(PreparedDataset.vocab_path, "w") as json_file:
         json.dump(phonemes_vocab, json_file)
 
     
