@@ -14,6 +14,17 @@ stages:
     outs:
       - ${PreparedDataset.save_path}
       - ${PreparedDataset.vocab_path}
+  balance-dataset:
+    cmd: python -m src.data_tools.balance_dataset
+    deps:
+      - ${PreparedDataset.save_path}
+      - ${AugmentedDataset.path}
+      - src/data_tools/balance_dataset.py
+    params:
+      - src/params.py:
+          - ProcessedDataset.save_path
+    outs:
+      - ${ProcessedDataset.save_path}
   train-and-evaluate:
     cmd: python -m src.train.train
     deps:

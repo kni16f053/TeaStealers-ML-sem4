@@ -22,6 +22,17 @@ class PreparedDataset:
     sep: str = "№"
     
 @dataclass(frozen=True)
+class AugmentedDataset:
+    path: str = "data/interim/augmented_dataset.csv"
+    audio_dir: str = "data/interim/augmented_audios/"
+    sep: str = "№"
+    
+@dataclass(frozen=True)
+class ProcessedDataset:
+    save_path: str = "data/processed/full_dataset.txt"
+    sep: str = "№"
+    
+@dataclass(frozen=True)
 class Split:
     train: float = 0.85
     val: float = 0.1
