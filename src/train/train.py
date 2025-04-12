@@ -17,8 +17,6 @@ from transformers import (
 
 from torch.optim import AdamW
 
-from torch.nn.utils.rnn import pad_sequence
-
 from tqdm import tqdm
 
 import warnings
@@ -26,7 +24,13 @@ warnings.filterwarnings('ignore')
 
 from ..params import PreparedDataset
 
-feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained("facebook/wav2vec2-large-960h-lv60")
+import sys
+sys.path.append('..')
+
+from ..data_tools.data_utils import ASR_Dataset, collate_fn
+from ..params import Split, Model, Optimizer, Training, Evaluation
+
+feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(Model.name)
 
 tokenizer = Wav2Vec2CTCTokenizer(
     vocab_file=PreparedDataset.vocab_path, 
@@ -36,40 +40,18 @@ tokenizer = Wav2Vec2CTCTokenizer(
     bos_token=None, 
     eos_token=None,
 )
-processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
 
+processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)  
 
-df = pd.read_csv(PreparedDataset.save_path, delimiter=PreparedDataset.vocab_path)
+dataset = ASR_Dataset(transcriptions_df_path=PreparedDataset.save_path, delimiter=PreparedDataset.sep, processor=processor)
 
-
-transciptions = list(df["transcription"])
-paths = list(df["path"])
-  
-
-dataset = ASR_Dataset(transcriptions_df_path="C:/Users/Home/Downloads/dataset_with_augmentations/ready_map_for_trainingV1.txt", processor=processor)
-
-train_size = int(0.85 * len(dataset))
-val_size = int(0.1 * len(dataset))
+train_size = int(Split.train * len(dataset))
+val_size = int(Split.val * len(dataset))
 test_size = len(dataset) - train_size - val_size
 
 train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
-
-def collate_fn(batch):
-    
-    input_values = torch.stack([element["input_values"] for element in batch])
-    labels = [element["labels"] for element in batch]
-    transcriptions = [element["transcription"] for element in batch]
-    
-    labels = pad_sequence(
-        labels,
-        batch_first=True,
-        padding_value=0
-    )
-    
-    return input_values, labels, transcriptions
-
-batch_size = 12
+batch_size = Training.batch_size
 
 train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
 val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
@@ -77,9 +59,8 @@ test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-
 model = Wav2Vec2ForCTC.from_pretrained(
-    "facebook/wav2vec2-large-960h-lv60", 
+    Model.name, 
     vocab_size=len(tokenizer.get_vocab()),
     pad_token_id=tokenizer.pad_token_id,
     ignore_mismatched_sizes=True)
@@ -97,9 +78,9 @@ for name, param in model.named_parameters():
 
 model.to(device)
 
-wer_metric = load("wer")
+wer_metric = load(Evaluation.metric)
 
-optimizer = AdamW(model.parameters(), lr=1e-3)
+optimizer = AdamW(model.parameters(), lr=Optimizer.lr)
 
 def run_epoch(model, dataloader, processor, train=False, optimizer=None):
     
@@ -149,7 +130,7 @@ def run_epoch(model, dataloader, processor, train=False, optimizer=None):
     return total_loss, metric
 
 
-num_epochs = 20
+num_epochs = Training.num_epochs
 for epoch in range(num_epochs):
 
     train_loss, train_wer = run_epoch(model, dataloader=train_dataloader, processor=processor, train=True, optimizer=optimizer)

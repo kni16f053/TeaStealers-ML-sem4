@@ -14,3 +14,9 @@ stages:
     outs:
       - ${PreparedDataset.save_path}
       - ${PreparedDataset.vocab_path}
+  train-and-evaluate:
+    cmd: python -m src.train.train
+    deps:
+      - ${PreparedDataset.save_path}
+      - ${PreparedDataset.vocab_path}
+      - src/train/train.py

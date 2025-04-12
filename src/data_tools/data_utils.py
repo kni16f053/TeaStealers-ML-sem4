@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import pandas as pd
 import librosa
 import numpy as np
+from torch.nn.utils.rnn import pad_sequence
 
 class ASR_Dataset(Dataset):
     
@@ -46,3 +47,17 @@ class ASR_Dataset(Dataset):
             "labels": torch.tensor(labels, dtype=torch.int),
             "transcription": transcription
         }
+        
+def collate_fn(batch):
+    
+    input_values = torch.stack([element["input_values"] for element in batch])
+    labels = [element["labels"] for element in batch]
+    transcriptions = [element["transcription"] for element in batch]
+    
+    labels = pad_sequence(
+        labels,
+        batch_first=True,
+        padding_value=0
+    )
+    
+    return input_values, labels, transcriptions

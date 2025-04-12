@@ -19,4 +19,26 @@ class PreparedDataset:
     save_path: str = "data/prepared/prepared_dataset.csv"
     vocab_path: str = "data/prepared/phonemes_vocab.csv"
     sep: str = "№"
+    
+@dataclass(frozen=True)
+class Split:
+    train: float = 0.85
+    val: float = 0.1
+    
+@dataclass(frozen=True)
+class Model:
+    name: str = "facebook/wav2vec2-large-960h-lv60"
+    
+@dataclass(frozen=True)
+class Optimizer:
+    lr: float = 1e-3
+    
+@dataclass(frozen=True)
+class Training:
+    batch_size: int = 2
+    num_epochs: int = 20
+    
+@dataclass(frozen=True)
+class Evaluation:
+    metric: str = "wer"
 
