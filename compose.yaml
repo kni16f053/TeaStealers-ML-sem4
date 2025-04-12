@@ -1,0 +1,65 @@
+services:
+  # База данных
+  db_for_project:
+    image: pgautoupgrade/pgautoupgrade:13-alpine
+    hostname: db
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-p", "5432", "-U", "${POSTGRE_USER}", "-d", "${POSTGRE_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  # S3 для хранения результатов экспериментов и данных
+  minio_for_project:
+   image: minio/minio:latest
+   restart: always
+   command: server --console-address ":9001" /data/
+   ports:
+     - "9000:9000"
+     - "9001:9001"
+   environment:
+     MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+     MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+   volumes:
+     - s3_data:/data
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+     interval: 30s
+     timeout: 20s
+     retries: 3
+
+  # Сервис для трекинга экспериментов
+  tracking_server_for_project:
+    build:
+      dockerfile: Dockerfile_mlflow
+    container_name: mlflow_server
+    depends_on:
+      db_for_project:
+        condition: service_healthy
+      minio_for_project:
+        condition: service_healthy
+    ports:
+      - "8090:5000"
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      MLFLOW_S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://${POSTGRE_USER}:${POSTGRE_PASSWORD}@db:5432/${POSTGRE_NAME}
+      --host 0.0.0.0
+      --serve-artifacts
+      --artifacts-destination s3://${MLFLOW_BUCKET_NAME}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  db_data:
+  s3_data:
