@@ -37,19 +37,49 @@ stages:
       size: 3551698
     - path: src/train/train.py
       hash: md5
-      md5: 020ce5b4279aaef2140cef5e8845ea69
-      size: 6197
+      md5: 71f19b63534deb194657958bc44b5775
+      size: 6312
     params:
       src/params.py:
         Evaluation:
           metric: wer
         Model:
           name: facebook/wav2vec2-large-960h-lv60
+          save_path: models/v1/
+          checkpoint_name: sample
         Optimizer:
           lr: 0.001
         Split:
-          train: 0.001
-          val: 0.001
+          train: 0.99
+          val: 0.005
         Training:
           batch_size: 2
-          num_epochs: 2
+          num_epochs: 1
+    outs:
+    - path: models/v1/sample.pth
+      hash: md5
+      md5: eaca4ea7222a4570e63077175bb17192
+      size: 1262117558
+  balance-dataset:
+    cmd: python -m src.data_tools.balance_dataset
+    deps:
+    - path: data/interim/augmented_dataset.csv
+      hash: md5
+      md5: 11e707f05ccb6685197eac93056d948f
+      size: 19004966
+    - path: data/prepared/prepared_dataset.csv
+      hash: md5
+      md5: 53fefbf918c52fd49a77e67ee856e1c1
+      size: 3551698
+    - path: src/data_tools/balance_dataset.py
+      hash: md5
+      md5: 493a9a80157b00a943b0636383949d5d
+      size: 8447
+    params:
+      src/params.py:
+        ProcessedDataset.save_path: data/processed/full_dataset.txt
+    outs:
+    - path: data/processed/full_dataset.txt
+      hash: md5
+      md5: 653ea722afb7f8300ed34665578a0b09
+      size: 6430521

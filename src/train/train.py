@@ -7,6 +7,7 @@ import numpy as np
 from torch.nn import Linear
 from evaluate import load
 import mlflow
+from mlflow.models import infer_signature
 
 
 from transformers import (
@@ -23,7 +24,7 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')    
 
-from ..params import PreparedDataset
+from ..params import PreparedDataset, ProcessedDataset
 
 import sys
 sys.path.append('..')
@@ -94,7 +95,7 @@ tokenizer = Wav2Vec2CTCTokenizer(
 
 processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)  
 
-dataset = ASR_Dataset(transcriptions_df_path=PreparedDataset.save_path, delimiter=PreparedDataset.sep, processor=processor)
+dataset = ASR_Dataset(transcriptions_df_path=ProcessedDataset.save_path, delimiter=ProcessedDataset.sep, processor=processor)
 
 train_size = int(Split.train * len(dataset))
 val_size = int(Split.val * len(dataset))
@@ -167,7 +168,8 @@ if __name__ == "__main__":
             
             print(f"Epoch {epoch + 1} validation_loss = {val_loss}, validation_wer = {val_wer}")
 
-        torch.save(model.state_dict(), "20_epoch.pth")
+        torch.save(model.state_dict(), Model.save_path + f"{Model.checkpoint_name}.pth")
+        
 
         test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
         metrics["test_loss"] = test_loss

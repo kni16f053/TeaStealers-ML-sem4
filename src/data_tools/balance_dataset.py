@@ -16,6 +16,11 @@ df_augmented_clean = pd.read_csv(AugmentedDataset.path, delimiter=AugmentedDatas
 # df_augmented_clean = df_augmented_clean.drop(['id'], axis=1)
 df_augmented_clean = df_augmented_clean[(df_augmented_clean['gender'] == "мужчина") | (df_augmented_clean['gender'] == "женщина")]
 
+def remake_path(path):
+    return AugmentedDataset.audio_dir + path.split("/")[-1]
+
+df_augmented_clean["path"] = df_augmented_clean["path"].apply(remake_path)
+
 unary_phonemes_list = [
     "æ","ɪ", "ɛ", "ɒ", "ʊ", "ʌ", "ə",
     "p", "f", "t", "θ", "s", "ʃ", "k", "b", "v", "d", "ð", "z", "ʒ", "ɡ", "h", "m", "n", "ŋ", "r", "l", "w", "j"
@@ -161,17 +166,25 @@ remaining_samples = original_samples_np[mask_to_remain]
 all_samples = np.concatenate([remaining_samples, added_samples])
 
 words_transcriptions = {}
-for word, transcription in zip(df_original['word'], df_original['transcription']):
+for word, transcription in zip(list(df_original['word']), list(df_original['transcription'])):
     words_transcriptions[word] = transcription
 
+dropped = 0
+added = 0
 for sample in all_samples:
 
-    if 'tokens' in sample:
-        del sample['tokens']
-    sample['path'] = sample['path'].split('.')[0] + '.wav'
-    sample['transcription'] = words_transcriptions[sample['word']]
-    
-    print(sample['word'])
+    try:
+        if 'tokens' in sample:
+            del sample['tokens']
+
+        sample['transcription'] = words_transcriptions[sample['word']]
+        added += 1
+    except:
+        dropped += 1
+
+# Небольшой косяк, связанный с отличием версий исходного датасета
+print(added)
+print(dropped)
 
   
 with open(ProcessedDataset.save_path, 'w', encoding='utf-8') as f:
@@ -180,4 +193,7 @@ with open(ProcessedDataset.save_path, 'w', encoding='utf-8') as f:
     f.write(titles)
     
     for sample in all_samples:
-        f.write(f"{sample['word']}" + f"{sep}" + f"{sample['transcription']}" + f"{sep}" + f"{sample['gender']}" + f"{sep}" + f"{sample['url']}" + f"{sep}" + f"{sample['path']}\n")
+        try:
+            f.write(f"{sample['word']}" + f"{sep}" + f"{sample['transcription']}" + f"{sep}" + f"{sample['gender']}" + f"{sep}" + f"{sample['url']}" + f"{sep}" + f"{sample['path']}\n")
+        except:
+            continue

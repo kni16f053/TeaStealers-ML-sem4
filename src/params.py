@@ -40,6 +40,8 @@ class Split:
 @dataclass(frozen=True)
 class Model:
     name: str = "facebook/wav2vec2-large-960h-lv60"
+    save_path: str = "models/v1/"
+    checkpoint_name: str = "sample"
     
 @dataclass(frozen=True)
 class Optimizer:
@@ -48,7 +50,7 @@ class Optimizer:
 @dataclass(frozen=True)
 class Training:
     batch_size: int = 12
-    num_epochs: int = 2
+    num_epochs: int = 20
     
 @dataclass(frozen=True)
 class Evaluation:

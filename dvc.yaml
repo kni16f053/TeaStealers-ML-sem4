@@ -38,3 +38,5 @@ stages:
           - Optimizer
           - Training
           - Evaluation
+    outs:
+      - ${Model.save_path}${Model.checkpoint_name}.pth
