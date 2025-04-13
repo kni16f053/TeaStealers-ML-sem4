@@ -11,7 +11,7 @@ class Settings:
 @dataclass(frozen=True)
 class Dataset:
     path: str = "data/external/labeled_dataset.txt"
-    delimiter: str = " № "
+    delimiter: str = "№"
     audio_dir: str = "data/external/audios/"
 
 

@@ -5,12 +5,12 @@ stages:
     deps:
     - path: data/external/labeled_dataset.txt
       hash: md5
-      md5: 80dab7f023dda3edc8d64a6660485289
-      size: 2583452
+      md5: 7f1449b629d034eb45ad972df424b490
+      size: 2566612
     - path: src/data_tools/prepare_data.py
       hash: md5
-      md5: 68aa65bc713bd1b803e161131e8e4798
-      size: 5249
+      md5: 46571e4c15d7da599bb32f05aa32f56f
+      size: 4732
     params:
       src/params.py:
         PreparedDataset.save_path: data/prepared/prepared_dataset.csv
@@ -22,8 +22,8 @@ stages:
       size: 635
     - path: data/prepared/prepared_dataset.csv
       hash: md5
-      md5: 53fefbf918c52fd49a77e67ee856e1c1
-      size: 3551698
+      md5: 31cee4d09efd6d1ee3a34d725e96692f
+      size: 3816231
   train-and-evaluate:
     cmd: python -m src.train.train
     deps:
@@ -69,8 +69,8 @@ stages:
       size: 19004966
     - path: data/prepared/prepared_dataset.csv
       hash: md5
-      md5: 53fefbf918c52fd49a77e67ee856e1c1
-      size: 3551698
+      md5: 31cee4d09efd6d1ee3a34d725e96692f
+      size: 3816231
     - path: src/data_tools/balance_dataset.py
       hash: md5
       md5: 493a9a80157b00a943b0636383949d5d
@@ -81,8 +81,8 @@ stages:
     outs:
     - path: data/processed/full_dataset.txt
       hash: md5
-      md5: 653ea722afb7f8300ed34665578a0b09
-      size: 6430521
+      md5: 6e0598c4a608b223d4330080f69c41ed
+      size: 6587776
   train:
     cmd: python -m src.train_and_evaluate.train
     deps:

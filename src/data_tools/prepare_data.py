@@ -24,9 +24,6 @@ phonemes_list = unary_phonemes_list + binary_phonemes_list
 def make_path(url):
     return Dataset.audio_dir + url.split("/")[-1]
 
-def clean_transcription(transcription):
-    return transcription[2:-2] # отсекаем слеши в начале и в конце
-
 def drop_words_by_phoneme(phoneme, df):
     return df[~df["transcription"].str.contains(phoneme)]
 
@@ -119,27 +116,15 @@ def show_word_by_transcription(transcription, df):
 
 if __name__ == "__main__":
     
-    df = pd.read_csv(Dataset.path, delimiter=Dataset.delimiter, 
-                 header=None, names=[
-                     "word",
-                     "transcription",
-                     "gender",
-                     "url"
-                 ])
+    df = pd.read_csv(Dataset.path, delimiter=Dataset.delimiter)
     
-    df_male = df[df.gender == "мужчина"]
-    df_female = df[df.gender == "женщина"]
+    df_male = df[df["gender"] == "мужчина"]
+    df_female = df[df["gender"]== "женщина"]
     
     df = pd.concat([df_male, df_female])
     
-    df["transcription"] = df["transcription"].apply(clean_transcription)
-    
     df_new = drop_words_by_phoneme("ø", df)
-    df_new = drop_words_by_phoneme("y", df_new)
-    
-    fix_transcription("interplanetary", "ɪntəplænɪtərɪ", df_new)
-    fix_transcription("lived", "lɪvd", df_new)
-    
+    df_new = drop_words_by_phoneme("y", df_new)    
     df_new = drop_words_by_phoneme('̃', df_new)
     df_new = drop_words_by_phoneme("œ", df_new)
     df_new = drop_words_by_phoneme("x", df_new)
