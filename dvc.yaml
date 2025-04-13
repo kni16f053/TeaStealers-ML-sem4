@@ -25,12 +25,12 @@ stages:
           - ProcessedDataset.save_path
     outs:
       - ${ProcessedDataset.save_path}
-  train-and-evaluate:
-    cmd: python -m src.train.train
+  train:
+    cmd: python -m src.train_and_evaluate.train
     deps:
       - ${PreparedDataset.save_path}
       - ${PreparedDataset.vocab_path}
-      - src/train/train.py
+      - src/train_and_evaluate/train.py
     params:
       - src/params.py:
           - Split
@@ -40,3 +40,12 @@ stages:
           - Evaluation
     outs:
       - ${Model.save_path}${Model.checkpoint_name}.pth
+  evaluate:
+    cmd: python -m src.train_and_evaluate.evaluate
+    deps:
+      - src/train_and_evaluate/evaluate.py
+    params:
+      - src/params.py:
+          - Model
+    outs:
+      - ${Model.save_path}${Model.checkpoint_name}_example.txt

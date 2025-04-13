@@ -83,3 +83,57 @@ stages:
       hash: md5
       md5: 653ea722afb7f8300ed34665578a0b09
       size: 6430521
+  train:
+    cmd: python -m src.train_and_evaluate.train
+    deps:
+    - path: data/prepared/phonemes_vocab.csv
+      hash: md5
+      md5: 346c5a6ac33f630cb7e56a8ad668d46f
+      size: 635
+    - path: data/prepared/prepared_dataset.csv
+      hash: md5
+      md5: 53fefbf918c52fd49a77e67ee856e1c1
+      size: 3551698
+    - path: src/train_and_evaluate/train.py
+      hash: md5
+      md5: f3c9cab338249573d72610811691e930
+      size: 6304
+    params:
+      src/params.py:
+        Evaluation:
+          metric: wer
+        Model:
+          name: facebook/wav2vec2-large-960h-lv60
+          save_path: models/v1/
+          checkpoint_name: sample
+        Optimizer:
+          lr: 0.001
+        Split:
+          train: 0.005
+          val: 0.005
+        Training:
+          batch_size: 2
+          num_epochs: 2
+    outs:
+    - path: models/v1/sample.pth
+      hash: md5
+      md5: a8e248fa6fe7f409c7b7aa8b6b29b5ed
+      size: 1262117558
+  evaluate:
+    cmd: python -m src.train_and_evaluate.evaluate
+    deps:
+    - path: src/train_and_evaluate/evaluate.py
+      hash: md5
+      md5: 5941a224db7efee95c216e974d5e6bac
+      size: 3081
+    params:
+      src/params.py:
+        Model:
+          name: facebook/wav2vec2-large-960h-lv60
+          save_path: models/v1/
+          checkpoint_name: sample
+    outs:
+    - path: models/v1/sample_example.txt
+      hash: md5
+      md5: 539cc1e4e8ae2538631aa70e44d721c3
+      size: 547
