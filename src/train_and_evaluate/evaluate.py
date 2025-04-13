@@ -32,7 +32,7 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 model = Wav2Vec2ForCTC.from_pretrained(
     Model.name, 
-    vocab_size=len(tokenizer.get_vocab()),
+    vocab_size=len(tokenizer.get_vocab()) + 1,
     pad_token_id=tokenizer.pad_token_id,
     ignore_mismatched_sizes=True)
 

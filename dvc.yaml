@@ -33,7 +33,7 @@ stages:
       - src/train_and_evaluate/train.py
     params:
       - src/params.py:
-          - Split
+          - Dataloader
           - Model
           - Optimizer
           - Training
@@ -49,3 +49,4 @@ stages:
           - Model
     outs:
       - ${Model.save_path}${Model.checkpoint_name}_example.txt
+    always_changed: true

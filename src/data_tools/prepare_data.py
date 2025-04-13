@@ -146,13 +146,15 @@ if __name__ == "__main__":
     phonemes, frequencies = get_phonemes_frequencies(df_new)
     frequencies_sorted, phonemes_sorted = zip(*sorted(zip(frequencies, phonemes), reverse=True))
     
-    phonemes_vocab = {"<pad>": 0, "<unk>": 1}
+    phonemes_vocab = {"<unk>": 1}
     i = 2
 
     for phoneme in phonemes_sorted:
         
         phonemes_vocab[phoneme] = i
         i += 1
+        
+    phonemes_vocab["<pad>"] = 48
         
     with open(PreparedDataset.vocab_path, "w") as json_file:
         json.dump(phonemes_vocab, json_file)

@@ -33,7 +33,7 @@ from dataclasses import asdict
 
 from .. import params
 from ..data_tools.data_utils import ASR_Dataset, collate_fn
-from ..params import Settings, Split, Model, Optimizer, Training, Evaluation
+from ..params import Settings, Dataloader, Model, Optimizer, Training, Evaluation
 
 def run_epoch(model, dataloader, processor, train=False, optimizer=None):
     
@@ -97,15 +97,15 @@ processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tok
 
 dataset = ASR_Dataset(transcriptions_df_path=ProcessedDataset.save_path, delimiter=ProcessedDataset.sep, processor=processor)
 
-train_size = int(Split.train * len(dataset))
-val_size = int(Split.val * len(dataset))
+train_size = int(Dataloader.train_split * len(dataset))
+val_size = int(Dataloader.val_split * len(dataset))
 test_size = len(dataset) - train_size - val_size
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 model = Wav2Vec2ForCTC.from_pretrained(
     Model.name, 
-    vocab_size=len(tokenizer.get_vocab()),
+    vocab_size=len(tokenizer.get_vocab()) + 1,
     pad_token_id=tokenizer.pad_token_id,
     ignore_mismatched_sizes=True)
 
@@ -113,13 +113,9 @@ model.config.bos_token_id = None
 model.config.eos_token_id = None
 model.config.word_delimiter_token = None
 
-batch_size = Training.batch_size
-
 wer_metric = load(Evaluation.metric)
 
 optimizer = AdamW(model.parameters(), lr=Optimizer.lr)
-
-num_epochs = Training.num_epochs
 
 if __name__ == "__main__":
     
@@ -130,18 +126,37 @@ if __name__ == "__main__":
         with open(Settings.tracking_commit_file, "w") as f:
             f.write(f"{run.info.run_id}")
             
-        split_params = {f"Split.{k}":v for k, v in asdict(params.Split()).items()}
+        dataLoader_params = {f"Dataloader.{k}":v for k, v in asdict(params.Dataloader()).items()}
         model_params = {f"Model.{k}":v for k, v in asdict(params.Model()).items()}
         optimizer_params = {f"Optimizer.{k}": v for k, v in asdict(params.Optimizer()).items()}
         training_params = {f"Training.{k}": v for k, v in asdict(params.Training()).items()}
         evaluation_params = {f"Evaluation.{k}": v for k, v in asdict(params.Evaluation()).items()}
-        mlflow.log_params(split_params | model_params | optimizer_params | training_params | evaluation_params)
+        mlflow.log_params(dataLoader_params | model_params | optimizer_params | training_params | evaluation_params)
 
         train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
-        train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
-        val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-        test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+        train_dataloader = DataLoader(
+            train_dataset, 
+            batch_size=Dataloader.batch_size, 
+            shuffle=True, 
+            collate_fn=collate_fn,
+            num_workers=Dataloader.num_workers
+            )
+        val_dataloader = DataLoader(
+            val_dataset, 
+            batch_size=Dataloader.batch_size, 
+            shuffle=False, 
+            collate_fn=collate_fn,
+            num_workers=Dataloader.num_workers
+            )
+        test_dataloader = DataLoader(
+            test_dataset, 
+            batch_size=
+            Dataloader.batch_size, 
+            shuffle=False, 
+            collate_fn=collate_fn,
+            num_workers=Dataloader.num_workers
+            )
 
         for name, param in model.named_parameters():
             param.requires_grad = any(unfreeze_name in name for unfreeze_name in ["encoder.layers.23", "lm_head"])
@@ -154,7 +169,7 @@ if __name__ == "__main__":
         
         metrics = {}
 
-        for epoch in range(num_epochs):
+        for epoch in range(Training.num_epochs):
 
             train_loss, train_wer = run_epoch(model, dataloader=train_dataloader, processor=processor, train=True, optimizer=optimizer)
             metrics[f"Epoch {epoch + 1} train_loss"] = train_loss

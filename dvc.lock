@@ -9,8 +9,8 @@ stages:
       size: 2566612
     - path: src/data_tools/prepare_data.py
       hash: md5
-      md5: 46571e4c15d7da599bb32f05aa32f56f
-      size: 4732
+      md5: 72374cb7dbaa0a1dbf9bb534a269fa72
+      size: 4762
     params:
       src/params.py:
         PreparedDataset.save_path: data/prepared/prepared_dataset.csv
@@ -18,8 +18,8 @@ stages:
     outs:
     - path: data/prepared/phonemes_vocab.csv
       hash: md5
-      md5: 346c5a6ac33f630cb7e56a8ad668d46f
-      size: 635
+      md5: cfde670e549333fed507c9b0f3800f5b
+      size: 636
     - path: data/prepared/prepared_dataset.csv
       hash: md5
       md5: 31cee4d09efd6d1ee3a34d725e96692f
@@ -88,18 +88,23 @@ stages:
     deps:
     - path: data/prepared/phonemes_vocab.csv
       hash: md5
-      md5: 346c5a6ac33f630cb7e56a8ad668d46f
-      size: 635
+      md5: cfde670e549333fed507c9b0f3800f5b
+      size: 636
     - path: data/prepared/prepared_dataset.csv
       hash: md5
-      md5: 53fefbf918c52fd49a77e67ee856e1c1
-      size: 3551698
+      md5: 31cee4d09efd6d1ee3a34d725e96692f
+      size: 3816231
     - path: src/train_and_evaluate/train.py
       hash: md5
-      md5: f3c9cab338249573d72610811691e930
-      size: 6304
+      md5: 4370415bb1c70cc9fafb51411f8c901f
+      size: 6806
     params:
       src/params.py:
+        Dataloader:
+          train_split: 0.001
+          val_split: 0.001
+          num_workers: 12
+          batch_size: 1
         Evaluation:
           metric: wer
         Model:
@@ -108,24 +113,20 @@ stages:
           checkpoint_name: sample
         Optimizer:
           lr: 0.001
-        Split:
-          train: 0.005
-          val: 0.005
         Training:
-          batch_size: 2
-          num_epochs: 2
+          num_epochs: 10
     outs:
     - path: models/v1/sample.pth
       hash: md5
-      md5: a8e248fa6fe7f409c7b7aa8b6b29b5ed
-      size: 1262117558
+      md5: f4c4c9c439fe8106e54f9e53e444aa19
+      size: 1262121718
   evaluate:
     cmd: python -m src.train_and_evaluate.evaluate
     deps:
     - path: src/train_and_evaluate/evaluate.py
       hash: md5
-      md5: 5941a224db7efee95c216e974d5e6bac
-      size: 3081
+      md5: 4fcb175f4cb650703faefea37b4b27b0
+      size: 3085
     params:
       src/params.py:
         Model:
@@ -135,5 +136,5 @@ stages:
     outs:
     - path: models/v1/sample_example.txt
       hash: md5
-      md5: 539cc1e4e8ae2538631aa70e44d721c3
-      size: 547
+      md5: 6d5cf514274a89c2d859af8e0f9997b8
+      size: 604

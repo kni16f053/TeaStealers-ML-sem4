@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 
-
+# Параметры эксперимента !! менять только поле experiment_name !!
 @dataclass(frozen=True)
 class Settings:
     mlflow_uri: str = "http://localhost:8090"
     tracking_commit_file: str = "../tracking_commit.lock"
     experiment_name: str = "Model v1"
 
-
+# Параметры датасетов !! лучше ничего не менять !!
 @dataclass(frozen=True)
 class Dataset:
     path: str = "data/external/labeled_dataset.txt"
@@ -32,10 +32,13 @@ class ProcessedDataset:
     save_path: str = "data/processed/full_dataset.txt"
     sep: str = "№"
     
+# Параметры обучения !! Можно менять всё) !!
 @dataclass(frozen=True)
-class Split:
-    train: float = 0.85
-    val: float = 0.1
+class Dataloader:
+    train_split: float = 0.8
+    val_split: float = 0.1
+    num_workers: int = 12
+    batch_size: int = 1
     
 @dataclass(frozen=True)
 class Model:
@@ -49,8 +52,7 @@ class Optimizer:
     
 @dataclass(frozen=True)
 class Training:
-    batch_size: int = 12
-    num_epochs: int = 20
+    num_epochs: int = 4
     
 @dataclass(frozen=True)
 class Evaluation:
