@@ -35,9 +35,9 @@ class ProcessedDataset:
 # Параметры обучения !! Можно менять всё) !!
 @dataclass(frozen=True)
 class Dataloader:
-    train_split: float = 0.8
+    train_split: float = 0.9
     val_split: float = 0.1
-    num_workers: int = 12
+    num_workers: int = 16
     batch_size: int = 1
     
 @dataclass(frozen=True)
@@ -52,7 +52,7 @@ class Optimizer:
     
 @dataclass(frozen=True)
 class Training:
-    num_epochs: int = 4
+    num_epochs: int = 100
     
 @dataclass(frozen=True)
 class Evaluation:

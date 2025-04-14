@@ -169,23 +169,34 @@ words_transcriptions = {}
 for word, transcription in zip(list(df_original['word']), list(df_original['transcription'])):
     words_transcriptions[word] = transcription
 
-dropped = 0
-added = 0
 for sample in all_samples:
 
-    try:
-        if 'tokens' in sample:
-            del sample['tokens']
+    if 'tokens' in sample:
+        del sample['tokens']
 
-        sample['transcription'] = words_transcriptions[sample['word']]
-        added += 1
-    except:
-        dropped += 1
+    sample['transcription'] = words_transcriptions[sample['word']]
 
-# Небольшой косяк, связанный с отличием версий исходного датасета
-print(added)
-print(dropped)
+words_to_debug = [
+    "cover",
+    "damage",
+    "awful",
+    "zoo",
+    "further",
+    "baby",
+    "accept",
+    "publish",
+    "write",
+    "sketch",
+    "smooth",
+    "sofa"    
+]
 
+debug_samples = []
+added = {word: False for word in words_to_debug}
+for sample in all_samples:
+    if (sample["word"] in words_to_debug) and not added[sample["word"]]:
+        debug_samples.append(sample)
+        added[sample["word"]] = True
   
 with open(ProcessedDataset.save_path, 'w', encoding='utf-8') as f:
     sep = PreparedDataset.sep
@@ -193,7 +204,5 @@ with open(ProcessedDataset.save_path, 'w', encoding='utf-8') as f:
     f.write(titles)
     
     for sample in all_samples:
-        try:
-            f.write(f"{sample['word']}" + f"{sep}" + f"{sample['transcription']}" + f"{sep}" + f"{sample['gender']}" + f"{sep}" + f"{sample['url']}" + f"{sep}" + f"{sample['path']}\n")
-        except:
-            continue
+
+        f.write(f"{sample['word']}" + f"{sep}" + f"{sample['transcription']}" + f"{sep}" + f"{sample['gender']}" + f"{sep}" + f"{sample['url']}" + f"{sep}" + f"{sample['path']}\n")

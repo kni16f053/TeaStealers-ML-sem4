@@ -57,7 +57,7 @@ def collate_fn(batch):
     labels = pad_sequence(
         labels,
         batch_first=True,
-        padding_value=48
+        padding_value=2
     )
     
     return input_values, labels, transcriptions

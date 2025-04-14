@@ -88,6 +88,7 @@ tokenizer = Wav2Vec2CTCTokenizer(
     vocab_file=PreparedDataset.vocab_path, 
     unk_token="<unk>", 
     pad_token="<pad>",
+    blank_token="<blank>",
     word_delimiter_token=None,
     bos_token=None, 
     eos_token=None,
@@ -105,7 +106,7 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 model = Wav2Vec2ForCTC.from_pretrained(
     Model.name, 
-    vocab_size=len(tokenizer.get_vocab()) + 1,
+    vocab_size=len(tokenizer.get_vocab()),
     pad_token_id=tokenizer.pad_token_id,
     ignore_mismatched_sizes=True)
 
@@ -167,29 +168,28 @@ if __name__ == "__main__":
 
         model.to(device)
         
-        metrics = {}
-
         for epoch in range(Training.num_epochs):
 
             train_loss, train_wer = run_epoch(model, dataloader=train_dataloader, processor=processor, train=True, optimizer=optimizer)
-            metrics[f"Epoch {epoch + 1} train_loss"] = train_loss
-            metrics[f"Epoch {epoch + 1} train_wer"] = train_wer
+            mlflow.log_metric("Train_loss", train_loss, step=epoch)
+            mlflow.log_metric("Train_wer", train_wer, step=epoch)
             
             print(f"Epoch {epoch + 1} train_loss = {train_loss}, train_wer = {train_wer}")
             
             val_loss, val_wer = run_epoch(model, dataloader=val_dataloader, processor=processor, train=False, optimizer=None)
-            metrics[f"Epoch {epoch + 1} validation_loss"] = val_loss
-            metrics[f"Epoch {epoch + 1} validation_wer"] = val_wer
+            mlflow.log_metric("Validation_loss", val_loss, step=epoch)
+            mlflow.log_metric("Validation_wer", val_wer, step=epoch)
             
             print(f"Epoch {epoch + 1} validation_loss = {val_loss}, validation_wer = {val_wer}")
-
+        
         torch.save(model.state_dict(), Model.save_path + f"{Model.checkpoint_name}.pth")
         
 
         test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
-        metrics["test_loss"] = test_loss
-        metrics["test_wer"] = test_wer
 
         print(f"test_loss = {test_loss}, test_wer = {test_wer}")
         
-        mlflow.log_metrics(metrics)
+        mlflow.log_metric("Test_loss", test_loss, step=epoch)
+        mlflow.log_metric("Test_wer", test_wer, step=epoch)
+        
+        
