@@ -1,10 +1,6 @@
 import torch
 from torch.utils.data import DataLoader, random_split
-import pandas as pd
-import librosa
-import json
-import numpy as np
-from torch.nn import Linear
+
 from evaluate import load
 import mlflow
 from mlflow.models import infer_signature
@@ -130,7 +126,9 @@ if __name__ == "__main__":
     mlflow.set_tracking_uri(Settings.mlflow_uri)
     mlflow.set_experiment(Settings.experiment_name)
     
-    with mlflow.start_run() as run:
+    mlflow.autolog()
+    
+    with mlflow.start_run(run_name=Settings.run_name) as run:
         with open(Settings.tracking_commit_file, "w") as f:
             f.write(f"{run.info.run_id}")
             
@@ -190,6 +188,8 @@ if __name__ == "__main__":
             print(f"Epoch {epoch + 1} validation_loss = {val_loss}, validation_wer = {val_wer}")
         
         torch.save(model.state_dict(), Model.save_path + f"{Model.checkpoint_name}.pth")
+        
+        mlflow.log_artifact(Model.save_path + f"{Model.checkpoint_name}.pth")
         
 
         test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)

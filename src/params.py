@@ -6,6 +6,7 @@ class Settings:
     mlflow_uri: str = "http://localhost:8090"
     tracking_commit_file: str = "../tracking_commit.lock"
     experiment_name: str = "Model v1"
+    run_name: str = "Sample"
 
 # Параметры датасетов !! лучше ничего не менять !!
 @dataclass(frozen=True)
@@ -35,8 +36,8 @@ class ProcessedDataset:
 # Параметры обучения !! Можно менять всё) !!
 @dataclass(frozen=True)
 class Dataloader:
-    train_split: float = 0.9
-    val_split: float = 0.1
+    train_split: float = 0.001
+    val_split: float = 0.001
     num_workers: int = 16
     batch_size: int = 1
     
@@ -56,7 +57,7 @@ class Optimizer:
     
 @dataclass(frozen=True)
 class Training:
-    num_epochs: int = 100
+    num_epochs: int = 1
     
 @dataclass(frozen=True)
 class Evaluation:
