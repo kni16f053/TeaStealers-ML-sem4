@@ -189,14 +189,23 @@ if __name__ == "__main__":
         
         torch.save(model.state_dict(), Model.save_path + f"{Model.checkpoint_name}.pth")
         
-        mlflow.log_artifact(Model.save_path + f"{Model.checkpoint_name}.pth")
+        # mlflow.log_artifact(Model.save_path + f"{Model.checkpoint_name}.pth")
         
+        # test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
 
-        test_loss, test_wer = run_epoch(model, dataloader=test_dataloader, processor=processor, train=False, optimizer=None)
-
-        print(f"test_loss = {test_loss}, test_wer = {test_wer}")
+        # print(f"test_loss = {test_loss}, test_wer = {test_wer}")
         
-        mlflow.log_metric("Test_loss", test_loss, step=epoch)
-        mlflow.log_metric("Test_wer", test_wer, step=epoch)
+        # mlflow.log_metric("Test_loss", test_loss, step=epoch)
+        # mlflow.log_metric("Test_wer", test_wer, step=epoch)
+        
+        mlflow.transformers.log_model(
+        transformers_model={
+            "model": model,
+            "tokenizer": tokenizer,
+            "feature_extractor": feature_extractor
+        },
+        artifact_path="wav2vec2_model",
+        task="automatic-speech-recognition",  # Указываем задачу ASR
+    )
         
         

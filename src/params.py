@@ -50,14 +50,14 @@ class Model:
     
 @dataclass(frozen=True)
 class Optimizer:
-    lr: float = 1e-3
+    lr: float = 1e-2
     beta1: float = 0.9
     beta2: float = 0.999
     weight_decay: float = 0.0
     
 @dataclass(frozen=True)
 class Training:
-    num_epochs: int = 1
+    num_epochs: int = 1000
     
 @dataclass(frozen=True)
 class Evaluation:

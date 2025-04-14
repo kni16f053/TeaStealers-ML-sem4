@@ -6,7 +6,25 @@ import numpy as np
 import sys
 sys.path.append('..')
 
-from ..params import Model, PreparedDataset, ProcessedDataset
+
+
+from ..params import Settings, Model, PreparedDataset, ProcessedDataset
+
+import mlflow
+
+from mlflow.tracking import MlflowClient
+
+mlflow.set_tracking_uri(Settings.mlflow_uri)
+client = MlflowClient()
+experiment_name = "Model v1"
+
+experiment = client.get_experiment_by_name(experiment_name)
+experiment_id = experiment.experiment_id
+
+runs = client.search_runs(
+    experiment_ids=[experiment_id]
+)
+
 
 from transformers import (
     Wav2Vec2Processor, 
@@ -107,3 +125,7 @@ if __name__ == "__main__":
     show_result(model, df, "zoo", processor)
     show_result(model, df, "further", processor)
     show_result(model, df, "baby", processor)
+    
+    run_id = runs[0].info.run_id
+    
+    client.log_artifact(run_id, Model.save_path + Model.checkpoint_name + f"_example.txt", "")

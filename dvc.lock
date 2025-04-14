@@ -9,8 +9,8 @@ stages:
       size: 2566612
     - path: src/data_tools/prepare_data.py
       hash: md5
-      md5: f5e4a525cdd1005dee67baecc4c84a1c
-      size: 4746
+      md5: 2bcd1a2bb658cd77ef3f8a8b8c86f252
+      size: 4731
     params:
       src/params.py:
         PreparedDataset.save_path: data/prepared/prepared_dataset.csv
@@ -96,13 +96,13 @@ stages:
       size: 3816231
     - path: src/train_and_evaluate/train.py
       hash: md5
-      md5: 3b3004ef67b331444951f0ac2e4d8e1e
-      size: 6831
+      md5: 785caa5911591d7d6e6abcb17d02161c
+      size: 7275
     params:
       src/params.py:
         Dataloader:
-          train_split: 1
-          val_split: 0
+          train_split: 0.001
+          val_split: 0.001
           num_workers: 16
           batch_size: 1
         Evaluation:
@@ -111,30 +111,35 @@ stages:
           name: facebook/wav2vec2-large-960h-lv60
           save_path: models/v1/
           checkpoint_name: sample
+          hidden_size: 1024
         Optimizer:
           lr: 0.001
+          beta1: 0.9
+          beta2: 0.999
+          weight_decay: 0.0
         Training:
-          num_epochs: 3
+          num_epochs: 2
     outs:
     - path: models/v1/sample.pth
       hash: md5
-      md5: 713c1245f22821f1bcbab4d85380678e
+      md5: 62109d1fa5e3f161d26ac7d81bb18caa
       size: 1262121718
   evaluate:
     cmd: python -m src.train_and_evaluate.evaluate
     deps:
     - path: src/train_and_evaluate/evaluate.py
       hash: md5
-      md5: 5941a224db7efee95c216e974d5e6bac
-      size: 3081
+      md5: 22661fa462f1fc073e2b784cef6fc59b
+      size: 3555
     params:
       src/params.py:
         Model:
           name: facebook/wav2vec2-large-960h-lv60
           save_path: models/v1/
           checkpoint_name: sample
+          hidden_size: 1024
     outs:
     - path: models/v1/sample_example.txt
       hash: md5
-      md5: 6eb4d608cf5b14fc511abf60d42e15ee
-      size: 636
+      md5: 35b8a5bbf9b521633411b3016612338d
+      size: 600
