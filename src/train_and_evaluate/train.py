@@ -116,7 +116,12 @@ model.config.word_delimiter_token = None
 
 wer_metric = load(Evaluation.metric)
 
-optimizer = AdamW(model.parameters(), lr=Optimizer.lr)
+optimizer = AdamW(
+    model.parameters(), 
+    lr=Optimizer.lr,
+    betas=(Optimizer.beta1, Optimizer.beta2),
+    weight_decay=Optimizer.weight_decay
+    )
 
 if __name__ == "__main__":
     

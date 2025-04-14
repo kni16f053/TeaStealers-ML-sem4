@@ -49,6 +49,9 @@ class Model:
 @dataclass(frozen=True)
 class Optimizer:
     lr: float = 1e-3
+    beta1: float = 0.9
+    beta2: float = 0.999
+    weight_decay: float = 0.0
     
 @dataclass(frozen=True)
 class Training:
