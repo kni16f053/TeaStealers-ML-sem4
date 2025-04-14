@@ -45,6 +45,7 @@ class Model:
     name: str = "facebook/wav2vec2-large-960h-lv60"
     save_path: str = "models/v1/"
     checkpoint_name: str = "sample"
+    hidden_size: int = 1024
     
 @dataclass(frozen=True)
 class Optimizer:

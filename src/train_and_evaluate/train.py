@@ -108,7 +108,9 @@ model = Wav2Vec2ForCTC.from_pretrained(
     Model.name, 
     vocab_size=len(tokenizer.get_vocab()),
     pad_token_id=tokenizer.pad_token_id,
-    ignore_mismatched_sizes=True)
+    ignore_mismatched_sizes=True,
+    hidden_size=Model.hidden_size
+    )
 
 model.config.bos_token_id = None
 model.config.eos_token_id = None
