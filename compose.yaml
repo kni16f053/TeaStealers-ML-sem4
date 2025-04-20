@@ -1,6 +1,6 @@
 services:
   # База данных
-  db_for_project:
+  db-for-project:
     image: pgautoupgrade/pgautoupgrade:13-alpine
     hostname: db
     environment:
@@ -14,7 +14,7 @@ services:
       retries: 3
 
   # S3 для хранения результатов экспериментов и данных
-  minio_for_project:
+  minio-for-project:
    image: minio/minio:latest
    restart: always
    command: server --console-address ":9001" /data/
@@ -33,14 +33,14 @@ services:
      retries: 3
 
   # Сервис для трекинга экспериментов
-  tracking_server_for_project:
+  tracking-server-for-project:
     build:
       dockerfile: Dockerfile_mlflow
     container_name: mlflow_server
     depends_on:
-      db_for_project:
+      db-for-project:
         condition: service_healthy
-      minio_for_project:
+      minio-for-project:
         condition: service_healthy
     ports:
       - "8090:5000"

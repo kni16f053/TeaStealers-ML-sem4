@@ -113,16 +113,16 @@ stages:
           checkpoint_name: sample
           hidden_size: 1024
         Optimizer:
-          lr: 0.001
+          lr: 0.01
           beta1: 0.9
           beta2: 0.999
           weight_decay: 0.0
         Training:
-          num_epochs: 2
+          num_epochs: 1000
     outs:
     - path: models/v1/sample.pth
       hash: md5
-      md5: 62109d1fa5e3f161d26ac7d81bb18caa
+      md5: f0ebc78cd86b9afcd942126b1ca14ef3
       size: 1262121718
   evaluate:
     cmd: python -m src.train_and_evaluate.evaluate
@@ -141,5 +141,5 @@ stages:
     outs:
     - path: models/v1/sample_example.txt
       hash: md5
-      md5: 35b8a5bbf9b521633411b3016612338d
-      size: 600
+      md5: 26a4abd2bba8876925a71e4c59da717f
+      size: 595
